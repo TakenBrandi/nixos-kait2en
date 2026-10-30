@@ -1,0 +1,36 @@
+# Nix build symlinks and outputs
+result
+result-*
+
+# Flake and evaluation caches
+.direnv/
+
+# System / OS files
+.DS_Store
+Thumbs.db
+
+# Editor and IDE directories
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+*.o
+*.ko
+*.mod
+*.mod.c
+*.mod.o
+*.order
+*.symvers
+.tmp_versions/
+built-in.a
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs and scratch
+*.log
