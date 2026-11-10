@@ -1,10 +1,10 @@
-{ stdenv, lib }:
+{ stdenv, lib, upstream }:
 
 stdenv.mkDerivation {
   pname = "t2bce-audio-alsa-ucm";
   version = "1.0.0";
 
-  src = ../../src/modules/t2bce_audio-alsa-ucm-conf;
+  src = upstream + "/modules/t2bce_audio-alsa-ucm-conf";
 
   installPhase = ''
     install -d $out/share/alsa/ucm2

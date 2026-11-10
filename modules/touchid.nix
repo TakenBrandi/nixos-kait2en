@@ -2,7 +2,7 @@
 
 let
   cfg = config.hardware.apple-t2;
-  t2TouchId = pkgs.callPackage ../pkgs/touchid { };
+  t2TouchId = pkgs.callPackage ../pkgs/touchid { upstream = cfg.upstreamSource; };
 in {
   options.hardware.apple-t2.touchid = {
     enable = lib.mkOption {

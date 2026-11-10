@@ -2,8 +2,8 @@
 
 let
   cfg = config.hardware.apple-t2;
-  t2Dsp = pkgs.callPackage ../pkgs/dsp { };
-  t2AlsaUcm = pkgs.callPackage ../pkgs/alsa-ucm { };
+  t2Dsp = pkgs.callPackage ../pkgs/dsp { upstream = cfg.upstreamSource; };
+  t2AlsaUcm = pkgs.callPackage ../pkgs/alsa-ucm { upstream = cfg.upstreamSource; };
 
   t2DspPipewireConfig = pkgs.runCommand "t2-dsp-pipewire-config" {
     passthru.requiredLv2Packages = [ pkgs.bankstown-lv2 pkgs.lsp-plugins ];

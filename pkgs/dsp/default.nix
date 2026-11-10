@@ -1,10 +1,10 @@
-{ stdenv, lib, python3, coreutils }:
+{ stdenv, lib, python3, coreutils, upstream }:
 
 stdenv.mkDerivation {
   pname = "t2-dsp";
   version = "1.0.0";
 
-  src = ../../src/dsp;
+  src = upstream + "/dsp";
 
   nativeBuildInputs = [ python3 ];
 

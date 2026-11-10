@@ -20,7 +20,7 @@
       packages = forAllSystems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-        in (import ./pkgs { inherit pkgs; }) // {
+        in (import ./pkgs { inherit pkgs; upstream = kait2en-fedora; }) // {
           iso-minimal = self.nixosConfigurations.iso-minimal.config.system.build.isoImage;
           iso-full = self.nixosConfigurations.iso-full.config.system.build.isoImage;
           # aliases

@@ -1,4 +1,5 @@
 { lib
+, upstream
 , rustPlatform
 , pkg-config
 , libinput
@@ -9,15 +10,15 @@ rustPlatform.buildRustPackage {
   pname = "t2-touchid";
   version = "0.1.0";
 
-  src = ../../src/services/t2-touchid;
+  src = upstream + "/t2-services/t2-touchid";
 
   postUnpack = ''
     mkdir -p $NIX_BUILD_TOP/shared/protocols
-    cp -r ${../../src/services/shared/protocols/t2-bridgexpc} $NIX_BUILD_TOP/shared/protocols/t2-bridgexpc
+    cp -r ${upstream + "/t2-services/shared/protocols/t2-bridgexpc"} $NIX_BUILD_TOP/shared/protocols/t2-bridgexpc
   '';
 
   cargoLock = {
-    lockFile = ../../src/services/t2-touchid/Cargo.lock;
+    lockFile = upstream + "/t2-services/t2-touchid/Cargo.lock";
   };
 
   nativeBuildInputs = [

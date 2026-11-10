@@ -4,7 +4,7 @@
 final: prev:
 
 let
-  kait2enPkgs = import ../pkgs { pkgs = final; };
+  kait2enPkgs = import ../pkgs { pkgs = final; inherit upstream; };
 in {
   inherit (kait2enPkgs) t2-dsp t2bce-audio-alsa-ucm extract-t2-firmware t2-touchid;
 
