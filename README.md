@@ -3,6 +3,7 @@
 [![NixOS](https://img.shields.io/badge/NixOS-unstable-blue.svg)](https://nixos.org)
 [![License](https://img.shields.io/badge/License-GPLv2%20%7C%20GPLv3-green.svg)](LICENSE)
 [![Apple T2](https://img.shields.io/badge/Apple-T2%20Security%20Chip-silver.svg)](https://t2linux.org)
+[![AI:W - Write (0RWX Framework)](https://img.shields.io/badge/AI%3AW-Write%20%280RWX%20Framework%29-black.svg)](https://0rwx.com/)
 
 Comprehensive NixOS hardware support flake for **all Apple T2 Macs (2018–2020)** powered by the [KaiT2en](https://github.com/kaiT2en/KaiT2en-Fedora) modular driver stack, hybrid graphics runtime power management, universal Touch Bar support, and calibrated speaker DSP.
 
