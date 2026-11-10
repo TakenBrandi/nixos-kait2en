@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "kait2en-fedora": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794329962,
+        "narHash": "sha256-mwGAsRO/NmX0O7+oJiOaYqM6/G6Rsa4RkBT0JwsKFqU=",
+        "owner": "kaiT2en",
+        "repo": "KaiT2en-Fedora",
+        "rev": "fed38053700302af0fe4e9519fe6a501b6a87520",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kaiT2en",
+        "repo": "KaiT2en-Fedora",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1793110635,
@@ -18,6 +34,7 @@
     },
     "root": {
       "inputs": {
+        "kait2en-fedora": "kait2en-fedora",
         "nixpkgs": "nixpkgs"
       }
     }

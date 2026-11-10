@@ -3,9 +3,16 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    # The KaiT2en driver stack this flake packages. The lock file pins the
+    # upstream commit; `nix flake update kait2en-fedora` syncs to a newer one.
+    kait2en-fedora = {
+      url = "github:kaiT2en/KaiT2en-Fedora";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs, kait2en-fedora }:
     let
       supportedSystems = [ "x86_64-linux" "aarch64-linux" ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
@@ -22,16 +29,24 @@
         }
       );
 
-      nixosModules = rec {
-        default = apple-t2;
-        apple-t2 = import ./modules;
-        kernel = import ./modules/kernel.nix;
-        graphics = import ./modules/graphics.nix;
-        audio = import ./modules/audio.nix;
-        touchbar = import ./modules/touchbar.nix;
-        firmware = import ./modules/firmware.nix;
-        touchid = import ./modules/touchid.nix;
-      };
+      nixosModules =
+        let
+          # Every exported module gets hardware.apple-t2.upstreamSource, set
+          # to this flake's pinned KaiT2en-Fedora input.
+          withUpstream = module: { lib, ... }: {
+            imports = [ ./modules/upstream.nix module ];
+            hardware.apple-t2.upstreamSource = lib.mkDefault kait2en-fedora;
+          };
+        in rec {
+          default = apple-t2;
+          apple-t2 = withUpstream ./modules;
+          kernel = withUpstream ./modules/kernel.nix;
+          graphics = withUpstream ./modules/graphics.nix;
+          audio = withUpstream ./modules/audio.nix;
+          touchbar = withUpstream ./modules/touchbar.nix;
+          firmware = withUpstream ./modules/firmware.nix;
+          touchid = withUpstream ./modules/touchid.nix;
+        };
 
       nixosConfigurations = {
         iso-minimal = nixpkgs.lib.nixosSystem {

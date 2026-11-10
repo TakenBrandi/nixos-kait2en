@@ -3,28 +3,43 @@
 let
   cfg = config.hardware.apple-t2;
 
-  # Linux version the patch series in src/patches is rebased onto. The
-  # series comes from KaiT2en-Fedora, which maintains it against Fedora's
-  # kernel; see src/patches/README.md for what changed for this version.
+  # Linux series the upstream runtime patches apply to. KaiT2en-Fedora
+  # maintains them against Fedora's kernel; bump this together with the
+  # kait2en-fedora input when upstream moves on.
   patchedKernelVersion = "7.3";
 
-  # One kernelPatches entry per line of src/patches/<set>/series.
+  # Patches upstream's installers skip on this kernel because it already
+  # contains them (scripts/fedora/install-<set>.sh, patch_needed_for_kernel).
+  inKernel = {
+    gpu-runtime-pm = [
+      "0001-drm-amdgpu-reset-VI-ASIC-on-MacBookPro15-1.patch" # merged in 7.3
+    ];
+  };
+
+  # One kernelPatches entry per line of patches/runtime/<set>/series upstream.
   patchSeries = set:
     let
-      dir = ../src/patches + "/${set}";
+      dir = cfg.upstreamSource + "/patches/runtime/${set}";
       lines = lib.splitString "\n" (builtins.readFile (dir + "/series"));
-      names = lib.filter (l: l != "" && !lib.hasPrefix "#" l) lines;
+      names = lib.filter
+        (l: l != "" && !lib.hasPrefix "#" l && !lib.elem l (inKernel.${set} or [ ]))
+        lines;
     in
     map (name: {
-      name = lib.removeSuffix ".patch" name;
+      name = "kait2en-${set}-${lib.removeSuffix ".patch" name}";
       patch = dir + "/${name}";
     }) names;
 
-  gpuRuntimePmPatches = patchSeries "gpu-runtime-pm";
-  wirelessPatches = patchSeries "wireless";
+  # Option name -> upstream patch set.
+  patchSets = {
+    gpuRuntimePm = "gpu-runtime-pm";
+    wireless = "wireless";
+    i915 = "i915";
+    thunderbolt = "thunderbolt";
+  };
 
-  patchesEnabled = cfg.kernelPatches.enable
-    && (cfg.kernelPatches.gpuRuntimePm || cfg.kernelPatches.wireless);
+  setEnabled = opt: cfg.kernelPatches.enable && cfg.kernelPatches.${opt};
+  patchesEnabled = lib.any setEnabled (lib.attrNames patchSets);
 
   kmods = pkgs.callPackage ../pkgs/kernel-modules {
     kernel = config.boot.kernelPackages.kernel;
@@ -46,7 +61,27 @@ in {
       wireless = lib.mkOption {
         type = lib.types.bool;
         default = true;
-        description = "Apply Broadcom BCM4364 Wi-Fi and Bluetooth runtime patches";
+        description = ''
+          Apply the Broadcom Wi-Fi and Bluetooth runtime patches (BCM4364,
+          BCM4377): suspend/resume fixes, power saving and AWDL support.
+        '';
+      };
+      i915 = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Apply the i915 runtime patches: PSR on Apple T2 eDP panels and
+          restoring the GMUX brightness on T2 MacBook Pros.
+        '';
+      };
+      thunderbolt = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Apply the Thunderbolt runtime patch (Titan Ridge and Ice Lake RTD3),
+          which lets the idle controller power down. It replaces the
+          out-of-tree t2thunderbolt module.
+        '';
       };
     };
   };
@@ -71,10 +106,15 @@ in {
     ];
 
     # kernel patches
-    boot.kernelPatches = lib.mkMerge [
-      (lib.mkIf (cfg.kernelPatches.enable && cfg.kernelPatches.gpuRuntimePm) gpuRuntimePmPatches)
-      (lib.mkIf (cfg.kernelPatches.enable && cfg.kernelPatches.wireless) wirelessPatches)
-    ];
+    boot.kernelPatches = lib.concatLists (lib.mapAttrsToList
+      (opt: set: lib.optionals (setEnabled opt) (patchSeries set))
+      patchSets);
+
+    # GMUX must provide the power callbacks before AMDGPU probes
+    # (upstream: /usr/lib/modprobe.d/kait2en-gpu-runtime-pm.conf).
+    boot.extraModprobeConfig = lib.mkIf (setEnabled "gpuRuntimePm") ''
+      softdep amdgpu pre: t2gmux
+    '';
 
     # out-of-tree kernel modules
     boot.extraModulePackages = [
@@ -86,11 +126,12 @@ in {
       kmods.t2_precision_trackpad
       kmods.t2_trackpad_actuator
       kmods.hid_t2magicmouse
-      kmods.t2thunderbolt
       kmods.t2smp
       kmods.t2sbs
       kmods.t2mfi_fastcharge
-    ];
+    ]
+    # Upstream retired t2thunderbolt in favour of the patched in-tree driver.
+    ++ lib.optional (!setEnabled "thunderbolt") kmods.t2thunderbolt;
 
     # early initrd modules for keyboard, storage, and graphics
     boot.initrd.availableKernelModules = [
@@ -130,14 +171,17 @@ in {
       "i915.enable_guc=2"
       "intel_iommu=on"
       "iommu=pt"
-      "pm_async=off"
       "pcie_aspm=force"
       "pcie_aspm.policy=powersave"
-      "pcie_ports=compat"
       "pci=noaer"
       "mem_sleep_default=deep"
       "initcall_blacklist=cmos_init,magicmouse_driver_init"
-    ];
+    ]
+    # Upstream dropped these: with the wireless patches the BCM4364 and BCM4377
+    # survive S3 with asynchronous suspend, and Thunderbolt runtime PM needs
+    # the PCIe port services. Keep them only when those patches are off.
+    ++ lib.optional (!setEnabled "wireless") "pm_async=off"
+    ++ lib.optional (!setEnabled "thunderbolt") "pcie_ports=compat";
 
     # blacklist conflicting in-tree kernel drivers
     boot.blacklistedKernelModules = [
