@@ -19,6 +19,8 @@
   };
 
   config = lib.mkIf config.hardware.apple-t2.enable {
-    nixpkgs.overlays = [ (import ../overlays) ];
+    nixpkgs.overlays = [
+      (import ../overlays { upstream = config.hardware.apple-t2.upstreamSource; })
+    ];
   };
 }

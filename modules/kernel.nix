@@ -43,6 +43,7 @@ let
 
   kmods = pkgs.callPackage ../pkgs/kernel-modules {
     kernel = config.boot.kernelPackages.kernel;
+    upstream = cfg.upstreamSource;
   };
 
 in {

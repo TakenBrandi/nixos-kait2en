@@ -67,7 +67,7 @@
       };
 
       overlays = {
-        default = import ./overlays;
+        default = import ./overlays { upstream = kait2en-fedora; };
       };
     };
 }

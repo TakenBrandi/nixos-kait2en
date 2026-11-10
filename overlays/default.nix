@@ -1,3 +1,6 @@
+# upstream: KaiT2en-Fedora source tree the kernel modules are built from.
+{ upstream }:
+
 final: prev:
 
 let
@@ -21,6 +24,7 @@ in {
         callPackage = kfinal.callPackage;
         inherit kernel;
         kmod = final.kmod;
+        inherit upstream;
       }
     );
   };
