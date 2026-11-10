@@ -5,6 +5,14 @@
 [![Apple T2](https://img.shields.io/badge/Apple-T2%20Security%20Chip-silver.svg)](https://t2linux.org)
 [![AI:W - Write (0RWX Framework)](https://img.shields.io/badge/AI%3AW-Write%20%280RWX%20Framework%29-black.svg)](https://0rwx.com/)
 
+> [!CAUTION]
+> **This fork is VERY unreliable at the moment.** It is in the middle of being
+> resynced with [KaiT2en-Fedora](https://github.com/kaiT2en/KaiT2en-Fedora) and
+> has only been tested on a single MacBookPro16,1, with known problems still
+> open. **Do not build the installer ISOs or install from this fork yet.** You
+> are likely to end up with a system that does not boot or shut down cleanly.
+> This warning will be removed once the work is complete.
+
 Comprehensive NixOS hardware support flake for **all Apple T2 Macs (2018–2020)** powered by the [KaiT2en](https://github.com/kaiT2en/KaiT2en-Fedora) modular driver stack, hybrid graphics runtime power management, universal Touch Bar support, and calibrated speaker DSP.
 
 Works out of the box on **MacBook Pro (13", 15", 16")**, **MacBook Air**, **Mac mini**, **Mac Pro**, and **iMac Pro**.
@@ -22,6 +30,25 @@ Works out of the box on **MacBook Pro (13", 15", 16")**, **MacBook Air**, **Mac 
 | **Mac mini (2018)** | `Macmini8,1` | Integrated (Intel UHD 630) | Standard PCM | N/A |
 | **Mac Pro (2019)** | `MacPro7,1` | Discrete PCIe AMD GPU | Standard PCM | N/A |
 | **iMac Pro (2017)** | `iMacPro1,1` | Discrete AMD Radeon Pro Vega | Standard PCM | N/A |
+
+> [!WARNING]
+> **MacBookPro16,1: the AMD GPU can fail to power back on in hybrid mode.**
+> In `graphics.mode = "hybrid"` the firmware boots on the Intel GPU and the
+> Radeon is powered off (D3cold) when idle. On a tested 16,1, powering it back
+> up fails: the GPU never answers after GMUX power-up, amdgpu retries forever,
+> shutdown and reboot hang, and the machine runs very hot until it is powered
+> off by hand. Anything that wakes the GPU can trigger this, including
+> shutdown itself.
+>
+> Until this is fixed, keep the Radeon powered on a 16,1:
+>
+> ```nix
+> boot.kernelParams = [ "amdgpu.runpm=0" ];
+> ```
+>
+> The Intel GPU still drives the display, and `DRI_PRIME=1` still runs
+> applications on the Radeon. If you are already stuck in a hang, run `sync`
+> (if you still can) and hold the power button.
 
 ---
 
