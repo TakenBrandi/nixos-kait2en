@@ -3,27 +3,28 @@
 let
   cfg = config.hardware.apple-t2;
 
-  gpuRuntimePmPatches = [
-    { name = "0001-drm-amdgpu-reset-VI-ASIC-on-MacBookPro15-1"; patch = ../src/patches/gpu-runtime-pm/0001-drm-amdgpu-reset-VI-ASIC-on-MacBookPro15-1.patch; }
-    { name = "0002-drm-amdgpu-Add-Apple-GMUX-runtime-PM-support"; patch = ../src/patches/gpu-runtime-pm/0002-drm-amdgpu-Add-Apple-GMUX-runtime-PM-support.patch; }
-    { name = "0003-drm-amdgpu-add-support-for-5K-iMacs"; patch = ../src/patches/gpu-runtime-pm/0003-drm-amdgpu-add-support-for-5K-iMacs.patch; }
-    { name = "0004-drm-amdgpu-catch-register-access-while-GMUX-keeps-the-GPU-off"; patch = ../src/patches/gpu-runtime-pm/0004-drm-amdgpu-catch-register-access-while-GMUX-keeps-the-GPU-off.patch; }
-    { name = "0005-drm-amd-display-refuse-DP-AUX-while-GMUX-keeps-the-GPU-off"; patch = ../src/patches/gpu-runtime-pm/0005-drm-amd-display-refuse-DP-AUX-while-GMUX-keeps-the-GPU-off.patch; }
-    { name = "0006-drm-amdgpu-skip-AC-DC-notification-while-the-GPU-is-runtime-suspended"; patch = ../src/patches/gpu-runtime-pm/0006-drm-amdgpu-skip-AC-DC-notification-while-the-GPU-is-runtime-suspended.patch; }
-    { name = "0007-drm-amd-display-skip-panel-power-savings-on-eDP-links-without-a-panel"; patch = ../src/patches/gpu-runtime-pm/0007-drm-amd-display-skip-panel-power-savings-on-eDP-links-without-a-panel.patch; }
-    { name = "0008-drm-amd-pm-use-the-VBIOS-trained-UCLK-levels-on-the-MacBookPro16-1"; patch = ../src/patches/gpu-runtime-pm/0008-drm-amd-pm-use-the-VBIOS-trained-UCLK-levels-on-the-MacBookPro16-1.patch; }
-    { name = "0009-drm-amd-pm-let-Apple-Navi-boards-lower-the-power-limit-to-40-percent"; patch = ../src/patches/gpu-runtime-pm/0009-drm-amd-pm-let-Apple-Navi-boards-lower-the-power-limit-to-40-percent.patch; }
-    { name = "0011-drm-amd-pm-remove-UMC-CDR-workaround-for-Apple-systems"; patch = ../src/patches/gpu-runtime-pm/0011-drm-amd-pm-remove-UMC-CDR-workaround-for-Apple-systems.patch; }
-    { name = "0012-drm-amd-display-avoid-MPC-pipe-split-on-the-MacBookPro16-1"; patch = ../src/patches/gpu-runtime-pm/0012-drm-amd-display-avoid-MPC-pipe-split-on-the-MacBookPro16-1.patch; }
-  ];
+  # Linux version the patch series in src/patches is rebased onto. The
+  # series comes from KaiT2en-Fedora, which maintains it against Fedora's
+  # kernel; see src/patches/README.md for what changed for this version.
+  patchedKernelVersion = "7.3";
 
-  wirelessPatches = [
-    { name = "0001-wifi-brcmfmac-disable-TX-beamforming-on-BCM4364"; patch = ../src/patches/wireless/0001-wifi-brcmfmac-disable-TX-beamforming-on-BCM4364.patch; }
-    { name = "0002-Bluetooth-btbcm-raise-ACL-priority-on-Apple-Broadcom-controllers"; patch = ../src/patches/wireless/0002-Bluetooth-btbcm-raise-ACL-priority-on-Apple-Broadcom-controllers.patch; }
-    { name = "0003-wifi-brcmfmac-use-a-200-ms-power-save-timeout-by-default"; patch = ../src/patches/wireless/0003-wifi-brcmfmac-use-a-200-ms-power-save-timeout-by-default.patch; }
-    { name = "0004-wifi-brcmfmac-match-firmware-capabilities-as-whole-words"; patch = ../src/patches/wireless/0004-wifi-brcmfmac-match-firmware-capabilities-as-whole-words.patch; }
-    { name = "0005-wifi-brcmfmac-leave-the-AP-4-way-handshake-to-the-host-on-Apple-chips"; patch = ../src/patches/wireless/0005-wifi-brcmfmac-leave-the-AP-4-way-handshake-to-the-host-on-Apple-chips.patch; }
-  ];
+  # One kernelPatches entry per line of src/patches/<set>/series.
+  patchSeries = set:
+    let
+      dir = ../src/patches + "/${set}";
+      lines = lib.splitString "\n" (builtins.readFile (dir + "/series"));
+      names = lib.filter (l: l != "" && !lib.hasPrefix "#" l) lines;
+    in
+    map (name: {
+      name = lib.removeSuffix ".patch" name;
+      patch = dir + "/${name}";
+    }) names;
+
+  gpuRuntimePmPatches = patchSeries "gpu-runtime-pm";
+  wirelessPatches = patchSeries "wireless";
+
+  patchesEnabled = cfg.kernelPatches.enable
+    && (cfg.kernelPatches.gpuRuntimePm || cfg.kernelPatches.wireless);
 
   kmods = pkgs.callPackage ../pkgs/kernel-modules {
     kernel = config.boot.kernelPackages.kernel;
@@ -51,7 +52,23 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
+    # The patches only apply to one kernel series, so default to it rather
+    # than linuxPackages_latest, which moves on to versions they don't fit.
+    boot.kernelPackages = lib.mkDefault
+      pkgs."linuxPackages_${lib.replaceStrings [ "." ] [ "_" ] patchedKernelVersion}";
+
+    assertions = [
+      {
+        assertion = !patchesEnabled
+          || lib.versions.majorMinor config.boot.kernelPackages.kernel.version == patchedKernelVersion;
+        message = ''
+          hardware.apple-t2.kernelPatches are rebased onto Linux ${patchedKernelVersion}, but
+          boot.kernelPackages is Linux ${config.boot.kernelPackages.kernel.version}. Use
+          pkgs.linuxPackages_${lib.replaceStrings [ "." ] [ "_" ] patchedKernelVersion}, or set
+          hardware.apple-t2.kernelPatches.enable = false to run this kernel unpatched.
+        '';
+      }
+    ];
 
     # kernel patches
     boot.kernelPatches = lib.mkMerge [

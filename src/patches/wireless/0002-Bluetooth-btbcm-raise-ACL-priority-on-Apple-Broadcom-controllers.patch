@@ -1,5 +1,8 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Andre Eikmeyer <dev@deq.rocks>
-Subject: [PATCH] Bluetooth: btbcm: raise ACL priority on Apple Broadcom controllers
+Date: Tue, 10 Nov 2026 00:00:00 +0000
+Subject: [PATCH] Bluetooth: btbcm: raise ACL priority on Apple
+ Broadcom controllers
 
 On the MacBookPro15,1 (BCM4364B0 over UART) A2DP audio drops out as
 soon as WLAN runs on 2.4 GHz with traffic. The host keeps the eight ACL
@@ -20,6 +23,15 @@ the command is queued from a work item.
 
 Signed-off-by: Andre Eikmeyer <dev@deq.rocks>
 ---
+ drivers/bluetooth/Kconfig       |  1 +
+ drivers/bluetooth/btbcm.c       | 72 +++++++++++++++++++++++++++++++++
+ drivers/bluetooth/btbcm.h       |  7 ++++
+ drivers/bluetooth/hci_bcm.c     | 18 ++++++++-
+ drivers/bluetooth/hci_bcm4377.c |  3 ++
+ 5 files changed, 99 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/bluetooth/Kconfig b/drivers/bluetooth/Kconfig
+index 4e8c24d..5651027 100644
 --- a/drivers/bluetooth/Kconfig
 +++ b/drivers/bluetooth/Kconfig
 @@ -304,6 +304,7 @@ config BT_HCIBCM4377
@@ -139,7 +151,7 @@ index b4cb242..a4d47b2 100644
  {
  	return 0;
 diff --git a/drivers/bluetooth/hci_bcm.c b/drivers/bluetooth/hci_bcm.c
-index cc419e1..d0a1a16 100644
+index 9a103db..ecda1b6 100644
 --- a/drivers/bluetooth/hci_bcm.c
 +++ b/drivers/bluetooth/hci_bcm.c
 @@ -147,6 +147,7 @@ struct bcm_device {

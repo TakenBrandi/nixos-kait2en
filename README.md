@@ -42,6 +42,7 @@ Works out of the box on **MacBook Pro (13", 15", 16")**, **MacBook Air**, **Mac 
   - Custom kernel runtime power management for dual-GPU models (`MacBookPro15,1`, `15,3`, `16,1`, `16,4`).
   - Puts the discrete AMD Radeon Pro GPU into **D3cold sleep (0W consumption)** when idle while Intel UHD 630 drives the internal display.
   - Transparent on-demand acceleration via `DRI_PRIME=1 <app>`. Restores cool thermals and multi-hour battery life.
+  - The kernel patches behind this are rebased onto **Linux 7.3**, the default kernel; see [`src/patches/README.md`](src/patches/README.md).
 - **Native Force Touch Haptics & Input**:
   - Modular `t2bce_stack` and `t2_precision_trackpad` with realistic click vibration simulation.
 - **Touch ID Biometrics (Apple Secure Enclave bridge)**:

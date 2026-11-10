@@ -1,5 +1,8 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Andre Eikmeyer <dev@deq.rocks>
-Subject: [PATCH] drm/amd/pm: use the VBIOS trained UCLK levels on the MacBookPro16,1
+Date: Tue, 10 Nov 2026 00:00:00 +0000
+Subject: [PATCH] drm/amd/pm: use the VBIOS trained UCLK levels on the
+ MacBookPro16,1
 
 The Radeon Pro 5300M and 5500M of the MacBookPro16,1 (Navi 14 boards
 1002:7340/106b:0210 and 1002:7340/106b:020f) stop answering SMU messages
@@ -18,9 +21,14 @@ Tested on three MacBookPro16,1, two with the 5500M and one with the 5300M.
 Cc: stable@vger.kernel.org
 Signed-off-by: Andre Eikmeyer <dev@deq.rocks>
 ---
+ .../gpu/drm/amd/pm/swsmu/smu11/navi10_ppt.c   | 56 +++++++++++++++++++
+ 1 file changed, 56 insertions(+)
+
+diff --git a/drivers/gpu/drm/amd/pm/swsmu/smu11/navi10_ppt.c b/drivers/gpu/drm/amd/pm/swsmu/smu11/navi10_ppt.c
+index f8ca5eb..0ae235a 100644
 --- a/drivers/gpu/drm/amd/pm/swsmu/smu11/navi10_ppt.c
 +++ b/drivers/gpu/drm/amd/pm/swsmu/smu11/navi10_ppt.c
-@@ -468,6 +468,60 @@ static int navi10_store_powerplay_table(struct smu_context *smu)
+@@ -470,6 +470,60 @@ static int navi10_store_powerplay_table(struct smu_context *smu)
  	return 0;
  }
  
@@ -81,7 +89,7 @@ Signed-off-by: Andre Eikmeyer <dev@deq.rocks>
  static int navi10_setup_pptable(struct smu_context *smu)
  {
  	int ret = 0;
-@@ -480,6 +534,8 @@ static int navi10_setup_pptable(struct smu_context *smu)
+@@ -482,6 +536,8 @@ static int navi10_setup_pptable(struct smu_context *smu)
  	if (ret)
  		return ret;
  

@@ -1,5 +1,8 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Andre Eikmeyer <dev@deq.rocks>
-Subject: [PATCH] drm/amd/pm: let Apple Navi boards lower the power limit to 40 % of TDP
+Date: Tue, 10 Nov 2026 00:00:00 +0000
+Subject: [PATCH] drm/amd/pm: let Apple Navi boards lower the power
+ limit to 40 % of TDP
 
 The pptables of the Navi GPUs in Apple Macs carry no overdrive power limit
 range, so the power limit can only be set to exactly the TDP. The Mac SMC
@@ -19,10 +22,15 @@ stays at 50 W and the CPU alone has to absorb the heatpipe limit.
 
 Signed-off-by: Andre Eikmeyer <dev@deq.rocks>
 ---
+ drivers/gpu/drm/amd/pm/swsmu/smu11/navi10_ppt.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/gpu/drm/amd/pm/swsmu/smu11/navi10_ppt.c b/drivers/gpu/drm/amd/pm/swsmu/smu11/navi10_ppt.c
+index 0ae235a..c9c8fe1 100644
 --- a/drivers/gpu/drm/amd/pm/swsmu/smu11/navi10_ppt.c
 +++ b/drivers/gpu/drm/amd/pm/swsmu/smu11/navi10_ppt.c
-@@ -2206,6 +2206,14 @@
- 		}
+@@ -2232,6 +2232,14 @@ static int navi10_init_ppt_limits(struct smu_context *smu)
+ 			SMU_11_0_ODSETTING_POWERPERCENTAGE]);
  	}
  
 +	/*
@@ -33,6 +41,6 @@ Signed-off-by: Andre Eikmeyer <dev@deq.rocks>
 +	if (!od_percent_lower && smu->adev->pdev->subsystem_vendor == PCI_VENDOR_ID_APPLE)
 +		od_percent_lower = 60;
 +
- 	dev_dbg(smu->adev->dev, "od percent upper:%d, od percent lower:%d (default power: %d)\n",
- 					od_percent_upper, od_percent_lower, power_limit);
- 
+ 	for (i = SMU_POWER_SOURCE_AC; i < SMU_POWER_SOURCE_COUNT; i++) {
+ 		smu->ppt_limits.range[i][SMU_PPT_LIMIT_PPT0].default_value =
+ 			default_limit[i];

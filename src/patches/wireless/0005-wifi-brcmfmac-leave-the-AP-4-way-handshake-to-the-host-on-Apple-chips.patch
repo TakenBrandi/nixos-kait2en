@@ -1,5 +1,8 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Andre Eikmeyer <dev@deq.rocks>
-Subject: [PATCH] wifi: brcmfmac: leave the AP 4-way handshake to the host on Apple chips
+Date: Tue, 10 Nov 2026 00:00:00 +0000
+Subject: [PATCH] wifi: brcmfmac: leave the AP 4-way handshake to the
+ host on Apple chips
 
 The Apple firmware for the BCM4364 and BCM4377 lists "idauth" in its
 capabilities, so brcmfmac enables BRCMF_FEAT_FWAUTH and advertises
@@ -22,9 +25,14 @@ in Apple's T2 Macs, so the host runs the handshake.
 
 Signed-off-by: Andre Eikmeyer <dev@deq.rocks>
 ---
+ .../wireless/broadcom/brcm80211/brcmfmac/feature.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.c
+index 9e557e0..0677f76 100644
 --- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.c
 +++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.c
-@@ -324,6 +324,20 @@
+@@ -324,6 +324,20 @@ void brcmf_feat_attach(struct brcmf_pub *drvr)
  					BIT(BRCMF_FEAT_WOWL_GTK);
  		}
  	}

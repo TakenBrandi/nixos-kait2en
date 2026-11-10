@@ -1,5 +1,8 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Andre Eikmeyer <dev@deq.rocks>
-Subject: [PATCH] drm/amd/display: avoid MPC pipe split on the MacBookPro16,1
+Date: Tue, 10 Nov 2026 00:00:00 +0000
+Subject: [PATCH] drm/amd/display: avoid MPC pipe split on the
+ MacBookPro16,1
 
 While the Navi 14 of the MacBookPro16,1 drives the built-in 3072x1920
 panel, DML picks two MPC combined pipes for it. With the split the
@@ -21,9 +24,14 @@ UCLK switches during scanout reach a level the SMU cannot switch into.
 
 Signed-off-by: Andre Eikmeyer <dev@deq.rocks>
 ---
+ drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
+index 63abac9..fee9ff8 100644
 --- a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
 +++ b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
-@@ -70,6 +70,7 @@
+@@ -77,6 +77,7 @@
  #include "ivsrcid/ivsrcid_vislands30.h"
  
  #include <linux/backlight.h>
@@ -31,7 +39,7 @@ Signed-off-by: Andre Eikmeyer <dev@deq.rocks>
  #include <linux/module.h>
  #include <linux/moduleparam.h>
  #include <linux/types.h>
-@@ -2221,7 +2222,16 @@ static int amdgpu_dm_init(struct amdgpu_device *adev)
+@@ -641,7 +642,16 @@ static int amdgpu_dm_init(struct amdgpu_device *adev)
  		goto error;
  	}
  

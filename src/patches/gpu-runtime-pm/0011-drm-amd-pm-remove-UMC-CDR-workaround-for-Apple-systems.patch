@@ -1,7 +1,8 @@
-From a23ee4f7f7c311a75d57bbebd87a1203cb1ad985 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
 Date: Sun, 18 Oct 2026 21:22:46 -0400
-Subject: [PATCH] drm/amd/pm: Remove UMC CDR Workaround for Apple systems
+Subject: [PATCH] drm/amd/pm: Remove UMC CDR Workaround for Apple
+ systems
 
 The workaround does nothing on apple macs, and when using
 apple firmware it gives errors like:
@@ -16,10 +17,10 @@ Signed-off-by: Atharva Tiwari <atharvatiwarilinuxdev@gmail.com>
  1 file changed, 3 insertions(+)
 
 diff --git a/drivers/gpu/drm/amd/pm/swsmu/smu11/navi10_ppt.c b/drivers/gpu/drm/amd/pm/swsmu/smu11/navi10_ppt.c
-index f8ca5eb9a..78b4240b8 100644
+index c9c8fe1..12ca3da 100644
 --- a/drivers/gpu/drm/amd/pm/swsmu/smu11/navi10_ppt.c
 +++ b/drivers/gpu/drm/amd/pm/swsmu/smu11/navi10_ppt.c
-@@ -2576,6 +2576,9 @@ static bool navi10_need_umc_cdr_workaround(struct smu_context *smu)
+@@ -2640,6 +2640,9 @@ static bool navi10_need_umc_cdr_workaround(struct smu_context *smu)
  	if (!smu_cmn_feature_is_enabled(smu, SMU_FEATURE_DPM_UCLK_BIT))
  		return false;
  
@@ -29,6 +30,3 @@ index f8ca5eb9a..78b4240b8 100644
  	if (amdgpu_ip_version(adev, MP1_HWIP, 0) == IP_VERSION(11, 0, 0) ||
  	    amdgpu_ip_version(adev, MP1_HWIP, 0) == IP_VERSION(11, 0, 5))
  		return true;
--- 
-2.55.0
-

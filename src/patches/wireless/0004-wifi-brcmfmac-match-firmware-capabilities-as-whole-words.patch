@@ -1,5 +1,8 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Andre Eikmeyer <dev@deq.rocks>
-Subject: [PATCH] wifi: brcmfmac: match firmware capabilities as whole words
+Date: Tue, 10 Nov 2026 00:00:00 +0000
+Subject: [PATCH] wifi: brcmfmac: match firmware capabilities as whole
+ words
 
 brcmf_feat_firmware_capabilities() looks for each capability with
 strnstr() in the space separated reply of the "cap" iovar, so a
@@ -24,9 +27,14 @@ longer needed.
 Fixes: ec64241c9fd2 ("brcmfmac: obtain feature info using 'cap' firmware command")
 Signed-off-by: Andre Eikmeyer <dev@deq.rocks>
 ---
+ .../wireless/broadcom/brcm80211/brcmfmac/feature.c   | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.c
+index 488364e..9e557e0 100644
 --- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.c
 +++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.c
-@@ -42,7 +42,7 @@
+@@ -42,7 +42,7 @@ static const struct brcmf_feat_fwcap brcmf_fwcap_map[] = {
  	{ BRCMF_FEAT_MONITOR_FLAG, "rtap" },
  	{ BRCMF_FEAT_MONITOR_FMT_RADIOTAP, "rtap" },
  	{ BRCMF_FEAT_DOT11H, "802.11h" },
@@ -35,7 +43,7 @@ Signed-off-by: Andre Eikmeyer <dev@deq.rocks>
  	{ BRCMF_FEAT_FWAUTH, "idauth" },
  	{ BRCMF_FEAT_SAE_EXT, "sae_ext" },
  };
-@@ -229,6 +229,7 @@
+@@ -229,6 +229,7 @@ static void brcmf_feat_firmware_capabilities(struct brcmf_if *ifp)
  {
  	struct brcmf_pub *drvr = ifp->drvr;
  	char caps[MAX_CAPS_BUFFER_SIZE];
@@ -43,7 +51,7 @@ Signed-off-by: Andre Eikmeyer <dev@deq.rocks>
  	enum brcmf_feat_id id;
  	int i, err;
  
-@@ -238,10 +239,15 @@
+@@ -238,10 +239,15 @@ static void brcmf_feat_firmware_capabilities(struct brcmf_if *ifp)
  		return;
  	}
  

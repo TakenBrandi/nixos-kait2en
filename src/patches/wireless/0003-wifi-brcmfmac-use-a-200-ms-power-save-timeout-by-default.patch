@@ -1,5 +1,8 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Andre Eikmeyer <dev@deq.rocks>
-Subject: [PATCH] wifi: brcmfmac: use a 200 ms power save timeout by default
+Date: Tue, 10 Nov 2026 00:00:00 +0000
+Subject: [PATCH] wifi: brcmfmac: use a 200 ms power save timeout by
+ default
 
 cfg80211 calls set_power_mgmt with timeout -1 when userspace does not ask
 for a particular dynamic power save timeout, which is what NetworkManager
@@ -16,9 +19,14 @@ MacBookPro15,1. Measured on that machine, idle with WLAN associated:
 
 Signed-off-by: Andre Eikmeyer <dev@deq.rocks>
 ---
+ drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
+index 872c488..d0ea213 100644
 --- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
 +++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
-@@ -87,6 +87,7 @@
+@@ -88,6 +88,7 @@
  #define BRCMF_ND_INFO_TIMEOUT		msecs_to_jiffies(2000)
  
  #define BRCMF_PS_MAX_TIMEOUT_MS		2000
@@ -26,7 +34,7 @@ Signed-off-by: Andre Eikmeyer <dev@deq.rocks>
  
  /* Dump obss definitions */
  #define ACS_MSRMNT_DELAY		80
-@@ -3332,6 +3333,9 @@ brcmf_cfg80211_set_power_mgmt(struct wiphy *wiphy, struct net_device *ndev,
+@@ -3343,6 +3344,9 @@ brcmf_cfg80211_set_power_mgmt(struct wiphy *wiphy, struct net_device *ndev,
  			bphy_err(drvr, "error (%d)\n", err);
  	}
  

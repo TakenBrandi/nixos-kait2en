@@ -1,10 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Andre Eikmeyer <dev@deq.rocks>
-Subject: [PATCH] drm/amd/display: refuse DP AUX while GMUX keeps the GPU off
+Date: Tue, 10 Nov 2026 00:00:00 +0000
+Subject: [PATCH] drm/amd/display: refuse DP AUX while GMUX keeps the
+ GPU off
 
 fwupd reads /dev/drm_dp_aux* while the GPU is runtime suspended. The AUX
 device holds no runtime PM reference, so the transfer touched registers of
 the powered off GPU and hung the PEG link on MacBookPro16,1.
+---
+ .../display/amdgpu_dm/amdgpu_dm_mst_types.c   | 19 +++++++++++++++++--
+ 1 file changed, 17 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_mst_types.c b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_mst_types.c
+index 7261317..b099bf5 100644
 --- a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_mst_types.c
 +++ b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_mst_types.c
 @@ -24,6 +24,7 @@
@@ -15,7 +23,7 @@ the powered off GPU and hung the PEG link on MacBookPro16,1.
  #include <linux/vmalloc.h>
  #include <drm/display/drm_dp_helper.h>
  #include <drm/display/drm_dp_mst_helper.h>
-@@ -68,6 +69,20 @@
+@@ -111,6 +112,20 @@ STATIC_IFN_KUNIT ssize_t dm_dp_aux_transfer(struct drm_dp_aux *aux,
  	if (WARN_ON(msg->size > 16))
  		return -E2BIG;
  
@@ -36,7 +44,7 @@ the powered off GPU and hung the PEG link on MacBookPro16,1.
  	payload.address = msg->address;
  	payload.data = msg->buffer;
  	payload.length = msg->size;
-@@ -87,13 +102,13 @@
+@@ -126,13 +141,13 @@ STATIC_IFN_KUNIT ssize_t dm_dp_aux_transfer(struct drm_dp_aux *aux,
  	result = dc_link_aux_transfer_raw(TO_DM_AUX(aux)->ddc_service, &payload,
  				      &operation_result);
  
